@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# Tired of typing the password and the bugged webssh
+
+user=${1:-app-script-ch10}
+port=2222
+host=challenge02
+
+if [[ $1 =~ crypt.* ]]; then
+    port=2221
+    host=challenge01
+fi
+# TBC
+
+sshpass -p $user ssh -p $port -o StrictHostKeyChecking=no -l $user $host.root-me.org
