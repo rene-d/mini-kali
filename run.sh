@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+IMAGENAME=${IMAGENAME:-kali}
+progname=$(basename "$0")
+
+# run the native container (amd64/i386)
+function run()
+{
+    exec docker run --rm -ti --label ${IMAGENAME} --hostname ${IMAGENAME} -v "$PWD":/${IMAGENAME} --cap-add=SYS_PTRACE ${IMAGENAME} $*
+}
+
+# run the arm/v7 container
+function arm()
+{
+    exec docker run --rm -ti --label ${IMAGENAME} --hostname ${IMAGENAME} -v "$PWD":/${IMAGENAME} --cap-add=SYS_PTRACE -e flavor=arm ${IMAGENAME}:arm $*
+}
+
+# run the arm64 container
+function arm64()
+{
+    exec docker run --rm -ti --label ${IMAGENAME} --hostname ${IMAGENAME} -v "$PWD":/${IMAGENAME} --cap-add=SYS_PTRACE -e flavor=arm64 ${IMAGENAME}:arm64 $*
+}
+
+# run the crypto/SageMath container
+function crypto()
+{
+    exec docker run --rm -ti --label ${IMAGENAME} --hostname ${IMAGENAME} -v "$PWD":/${IMAGENAME} -e flavor=crypto ${IMAGENAME}:crypto $*
+}
+
+# attach to a running container
+function attach()
+{
+    if [[ "$1" == "-h" ]]; then
+        echo "Usage: $progname [-h | list | <n>]"
+        exit
+    fi
+
+    if [[ "$1" == "list" ]]; then
+        docker container ls  --filter 'label=${IMAGENAME}' --format '{{.ID}}\t{{.Status}}\t{{.Image}}\t{{.Command}}'
+        exit
+    fi
+
+    declare -a ids
+
+    ids=($(docker container ls --format '{{.ID}}' --filter 'label=${IMAGENAME}'))
+    nb=${#ids[@]}
+
+    if [ "${nb}" -eq 1 ]; then
+        n=0
+    elif [[ "$1" == "" ]]; then
+        echo "${nb} containers are running, please choose one"
+        exit
+    else
+        n=$(($1))
+        if [ $n -lt 0 -o $n -ge $nb ]; then
+            echo "Invalid container number ($n), should be 0 ≤ n < ${nb}"
+            exit
+        fi
+    fi
+
+    exec docker exec -ti -e instance=$n ${ids[$n]} bash
+}
+
+
+if [[ "$progname" =~ ^.*\-attach$ ]]; then
+    attach $*
+elif [[ "$progname" =~ ^.*\-arm$ ]]; then
+    arm $*
+elif [[ "$progname" =~ ^.*\-arm64$ ]]; then
+    arm64 $*
+elif [[ "$progname" =~ ^.*\-crypto$ ]]; then
+    crypto $*
+else
+    run $*
+fi

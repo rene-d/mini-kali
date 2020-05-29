@@ -1,0 +1,45 @@
+FROM kalilinux/kali-rolling
+
+ARG IMAGENAME=kali
+
+RUN apt-get update \
+&&  apt-get upgrade -y \
+&&  apt-get install -y vim python3-dev netcat bsdmainutils sshpass gawk bash-completion curl \
+&&  apt-get clean
+
+# set locales to UTF-8
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
+&&  sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+&&  locale-gen en_US.UTF-8 \
+&&  dpkg-reconfigure --frontend=noninteractive locales \
+&&  /usr/sbin/update-locale LANG=en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+
+# get last version of pip
+RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 -
+
+RUN apt-get install -y --no-install-recommends sagemath \
+&&  apt-get clean
+
+# the tools
+RUN set -ex \
+&&  apt-get install -y libgmp3-dev libmpc-dev git \
+&&  apt-get clean \
+&&  mkdir -p /opt/tools \
+&&  git clone --depth=1 https://github.com/Ganapati/RsaCtfTool \
+&&  cd RsaCtfTool \
+&&  pip3 install --no-cache-dir -r requirements.txt -r optional-requirements.txt
+
+# the user profile
+RUN ln -f /etc/skel/.bashrc /root/.bashrc
+COPY bash_aliases /root/.bash_aliases
+COPY vimrc /root/.vimrc
+COPY rootme_ssh *-wrapper /usr/local/bin/
+RUN /usr/local/bin/rootme_ssh --add
+
+VOLUME /${IMAGENAME}
+WORKDIR /${IMAGENAME}
+
+CMD ["bash", "-l"]

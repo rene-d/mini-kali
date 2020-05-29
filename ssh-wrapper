@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+
+password=$(awk '
+BEGIN {
+    # Collect the SSH arguments as keys of a dictionary, so that we can easily
+    # check for inclusion.
+    for (i = 2; i < ARGC; i++) {
+        sshArgs[ARGV[i]] = 1
+    }
+
+    # Only process the first argument; all others are the command-line arguments
+    # given to ssh.
+    ARGC = 2
+}
+$1 == "Password" && inhost { print $2 }
+/^\s*Host\s/ {
+    if ($2 in sshArgs)
+        inhost=1
+    else
+        inhost=0
+}
+' ~/.ssh/config "$@")
+
+
+if [ "$password" ]; then
+    sshpass -p "$password" "$(which ssh)" "$@"
+else
+    "$(which ssh)" "$@"
+fi

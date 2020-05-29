@@ -1,0 +1,226 @@
+#!/usr/bin/env bash
+
+# Tired of typing the password and of the bugged webssh
+
+user=${1:-app-script-ch11}
+
+[[ $user == "64" ]] && user=app-systeme-ch1
+[[ $user == "32" ]] && user=app-systeme-ch5
+[[ $user == "arm" ]] && user=app-systeme-ch45
+[[ $user == "win" ]] && user=app-systeme-ch72
+
+# cat /etc/passwd | grep -v -E 'crack|nologin|^challenge:|false$' | grep challenge | cut -f1 -d:
+
+# Linux challenge01 4.4.0-177-generic #207-Ubuntu SMP Mon Mar 16 01:16:10 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux
+challenge01=(
+cryptanalyse-ch31
+cryptanalyse-ch27
+cryptanalyse-ch21
+programmation-ch10
+programmation-ch11
+web-serveur-ch41
+web-serveur-ch43
+cryptanalyse-ch36
+programmation-ch12
+cryptanalyse-ch38
+cryptanalyse-ch41
+programmation-ch13
+programmation-ch14
+programmation-ch15
+cryptanalyse-ch43
+cryptanalyse-ch44
+cryptanalyse-ch45
+cryptanalyse-ch46
+)
+
+# Linux challenge02 4.15.0-96-generic #97-Ubuntu SMP Wed Apr 1 03:02:00 UTC 2020 i686 i686 i686 GNU/Linux
+challenge02=(
+app-systeme-ch5
+app-systeme-ch7
+app-systeme-ch8
+app-systeme-ch9
+app-systeme-ch10
+app-systeme-ch11
+app-systeme-ch12
+app-systeme-ch13
+app-systeme-ch14
+app-systeme-ch15
+app-systeme-ch16
+app-systeme-ch17
+app-systeme-ch18
+app-systeme-ch20
+app-systeme-ch31
+app-systeme-ch32
+app-systeme-ch33
+app-script-ch1
+app-script-ch3
+app-script-ch4
+app-script-ch6
+app-script-ch7
+app-script-ch8
+app-script-ch17
+app-script-ch9
+app-script-ch10
+app-script-ch15
+app-script-ch16
+app-script-ch11
+app-script-ch12
+app-script-ch13
+app-script-ch14
+app-script-ch14-2
+app-script-ch14-3
+app-script-ch14-4
+app-script-ch14-5
+app-script-ch14-6
+app-script-ch14-7
+app-script-ch14-8
+app-script-ch14-9
+app-script-ch14-10
+app-script-ch14-11
+app-script-ch14-12
+app-script-ch14-13
+app-script-ch14-14
+app-script-ch2
+)
+
+# Linux challenge03 4.15.0-96-generic #97-Ubuntu SMP Wed Apr 1 03:25:46 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux
+challenge03=(
+app-systeme-ch1
+app-systeme-ch2
+app-systeme-ch6
+app-systeme-ch53
+app-systeme-ch54
+app-systeme-ch60
+app-systeme-ch61
+app-systeme-ch30
+app-systeme-ch4
+app-systeme-ch18
+app-systeme-ch19
+app-systeme-ch21
+app-systeme-ch22
+app-systeme-ch23
+app-systeme-ch24
+app-systeme-ch25
+app-systeme-ch26
+app-systeme-ch27
+app-systeme-ch28
+app-systeme-ch34
+app-systeme-ch35
+app-systeme-ch36
+app-systeme-ch37
+app-systeme-ch38
+app-systeme-ch39
+app-systeme-ch40
+app-systeme-ch41
+app-systeme-ch42
+app-systeme-ch63
+app-systeme-ch64
+app-systeme-ch65
+app-systeme-ch66
+app-systeme-ch67
+app-systeme-ch69
+app-systeme-ch70
+app-systeme-ch71
+app-systeme-ch44
+app-systeme-ch57
+app-systeme-ch77
+programmation-ch79
+app-systeme-ch59
+app-systeme-ch79
+app-systeme-ch80
+app-systeme-ch81
+)
+
+# Linux challenge04 4.9.182-mainline-rev1 #1 SMP Mon Jun 17 19:55:28 UTC 2019 armv7l armv7l armv7l GNU/Linux
+challenge04=(
+app-systeme-ch45
+app-systeme-ch46
+app-systeme-ch47
+app-systeme-ch48
+app-systeme-ch49
+app-systeme-ch50
+app-systeme-ch51
+app-systeme-ch52
+app-systeme-ch55
+app-systeme-ch56
+app-systeme-ch58
+programmation-ch16
+)
+
+# CYGWIN_NT-10.0 challenge05 3.0.7(0.338/5/3) 2019-04-30 18:08 x86_64 Cygwin
+challenge05=(
+app-systeme-ch72
+app-systeme-ch73
+app-systeme-ch74
+app-systeme-ch75
+app-systeme-ch76
+app-systeme-ch78
+)
+
+if [ "$1" = "--add" ]; then
+    mkdir -p /root/.ssh
+    cat <<'EOF' > /root/.ssh/config
+# Allow specifying passwords for Host entries, to be parsed by ssh-wrapper.
+IgnoreUnknown Password
+EOF
+    add_one()
+    {
+            cat <<EOF >> /root/.ssh/config
+
+Host $1
+    User $2
+    Password $2
+    Hostname $3.root-me.org
+    Port $4
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+EOF
+    }
+
+    add()
+    {
+        echo $1 $2
+        aa=$1[@]
+        for i in ${!aa}; do
+            add_one $i $i $1 $2
+        done
+    }
+
+    add_one 32 app-systeme-ch5 challenge02 2222
+    add_one 64 app-systeme-ch1 challenge03 2223
+    add_one arm app-systeme-ch45 challenge04 2224
+    add_one win app-systeme-ch72 challenge05 2225
+
+    add challenge01 2221
+    add challenge02 2222
+    add challenge03 2223
+    add challenge04 2224
+    add challenge05 2225
+
+    exit 0
+fi
+
+
+if [[ " ${challenge01[@]} " =~ " ${user} " ]]; then
+    port=2221
+    host=challenge01
+fi
+if [[ " ${challenge02[@]} " =~ " ${user} " ]]; then
+    port=2222
+    host=challenge02
+fi
+if [[ " ${challenge03[@]} " =~ " ${user} " ]]; then
+    port=2223
+    host=challenge03
+fi
+if [[ " ${challenge04[@]} " =~ " ${user} " ]]; then
+    port=2224
+    host=challenge04
+fi
+if [[ " ${challenge05[@]} " =~ " ${user} " ]]; then
+    port=2225
+    host=challenge05
+fi
+
+
+sshpass -p $user ssh -p $port -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -l $user $host.root-me.org

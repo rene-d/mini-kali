@@ -1,0 +1,32 @@
+#!/bin/bash
+
+password=$(awk '
+BEGIN {
+    # Collect the SCP arguments as keys of a dictionary, so that we can easily
+    # check for inclusion.
+    for (i = 2; i < ARGC; i++) {
+        colonIdx = index(ARGV[i], ":")
+        if (colonIdx > 0) {
+            scpArgs[substr(ARGV[i], 1, colonIdx - 1)] = 1
+        }
+    }
+
+    # Only process the first argument; all others are the command-line arguments
+    # given to scp.
+    ARGC = 2
+}
+$1 == "Password" && inhost { print $2 }
+/^\s*Host\s/ {
+    if ($2 in scpArgs)
+        inhost=1
+    else
+        inhost=0
+}
+' ~/.ssh/config "$@")
+
+
+if [ "$password" ]; then
+    sshpass -p "$password" "$(which scp)" "$@"
+else
+    "$(which scp)" "$@"
+fi
