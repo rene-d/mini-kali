@@ -1,7 +1,8 @@
 FROM kalilinux/kali-rolling
 
-ARG IMAGENAME=kali
+ARG IMAGE_NAME=kali
 
+# the base system
 RUN [ "$(uname -m)" = "x86_64" ] && dpkg --add-architecture i386 || true \
 &&  apt-get update \
 &&  apt-get upgrade -y \
@@ -9,7 +10,6 @@ RUN [ "$(uname -m)" = "x86_64" ] && dpkg --add-architecture i386 || true \
 &&  apt-get install -y gdb gdbserver strace vim upx python3-dev poppler-utils ruby netcat bsdmainutils sshpass gawk bash-completion \
 &&  [ "$(uname -m)" = "x86_64" ] && apt-get install -y binwalk ltrace libc6-i386 gcc-multilib g++-multilib john foremost sqlmap || true \
 &&  apt-get clean
-
 
 # get last version of pip
 RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 -
@@ -49,12 +49,11 @@ RUN set -ex \
         rm /tmp/radare2_4.3.1_amd64.deb ; \
     fi \
 \
-&&  echo Done
-
 # https://blog.didierstevens.com/programs/pdf-tools/
-RUN curl -sL http://didierstevens.com/files/software/pdf-parser_V0_7_4.zip | funzip > /usr/local/bin/pdf-parser.py \
-&&  chmod a+x /usr/local/bin/pdf-parser.py
-
+&&  curl -sL http://didierstevens.com/files/software/pdf-parser_V0_7_4.zip | funzip > /usr/local/bin/pdf-parser.py \
+&&  chmod a+x /usr/local/bin/pdf-parser.py \
+\
+&&  echo Done
 
 # set locales to UTF-8
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
@@ -74,7 +73,7 @@ COPY gdbinit /root/.gdbinit
 COPY disasm.sh asm.sh rootme_ssh *-wrapper /usr/local/bin/
 RUN /usr/local/bin/rootme_ssh --add
 
-VOLUME /${IMAGENAME}
-WORKDIR /${IMAGENAME}
+VOLUME /${IMAGE_NAME}
+WORKDIR /${IMAGE_NAME}
 
 CMD ["bash", "-l"]

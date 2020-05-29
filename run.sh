@@ -1,30 +1,29 @@
 #!/usr/bin/env bash
 
-IMAGENAME=${IMAGENAME:-kali}
 progname=$(basename "$0")
 
 # run the native container (amd64/i386)
 function run()
 {
-    exec docker run --rm -ti --label ${IMAGENAME} --hostname ${IMAGENAME} -v "$PWD":/${IMAGENAME} --cap-add=SYS_PTRACE ${IMAGENAME} $*
+    exec docker run --rm -ti --label ${IMAGE_NAME} --hostname ${IMAGE_NAME} -v "$PWD":/${IMAGE_NAME} --cap-add=SYS_PTRACE ${IMAGE_NAME} $*
 }
 
 # run the arm/v7 container
 function arm()
 {
-    exec docker run --rm -ti --label ${IMAGENAME} --hostname ${IMAGENAME} -v "$PWD":/${IMAGENAME} --cap-add=SYS_PTRACE -e flavor=arm ${IMAGENAME}:arm $*
+    exec docker run --rm -ti --label ${IMAGE_NAME} --hostname ${IMAGE_NAME} -v "$PWD":/${IMAGE_NAME} --cap-add=SYS_PTRACE -e flavor=arm ${IMAGE_NAME}:arm $*
 }
 
 # run the arm64 container
 function arm64()
 {
-    exec docker run --rm -ti --label ${IMAGENAME} --hostname ${IMAGENAME} -v "$PWD":/${IMAGENAME} --cap-add=SYS_PTRACE -e flavor=arm64 ${IMAGENAME}:arm64 $*
+    exec docker run --rm -ti --label ${IMAGE_NAME} --hostname ${IMAGE_NAME} -v "$PWD":/${IMAGE_NAME} --cap-add=SYS_PTRACE -e flavor=arm64 ${IMAGE_NAME}:arm64 $*
 }
 
 # run the crypto/SageMath container
 function crypto()
 {
-    exec docker run --rm -ti --label ${IMAGENAME} --hostname ${IMAGENAME} -v "$PWD":/${IMAGENAME} -e flavor=crypto ${IMAGENAME}:crypto $*
+    exec docker run --rm -ti --label ${IMAGE_NAME} --hostname ${IMAGE_NAME} -v "$PWD":/${IMAGE_NAME} -e flavor=crypto ${IMAGE_NAME}:crypto $*
 }
 
 # attach to a running container
@@ -36,13 +35,13 @@ function attach()
     fi
 
     if [[ "$1" == "list" ]]; then
-        docker container ls  --filter 'label=${IMAGENAME}' --format '{{.ID}}\t{{.Status}}\t{{.Image}}\t{{.Command}}'
+        docker container ls  --filter 'label=${IMAGE_NAME}' --format '{{.ID}}\t{{.Status}}\t{{.Image}}\t{{.Command}}'
         exit
     fi
 
     declare -a ids
 
-    ids=($(docker container ls --format '{{.ID}}' --filter 'label=${IMAGENAME}'))
+    ids=($(docker container ls --format '{{.ID}}' --filter 'label=${IMAGE_NAME}'))
     nb=${#ids[@]}
 
     if [ "${nb}" -eq 1 ]; then

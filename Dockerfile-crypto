@@ -1,7 +1,8 @@
 FROM kalilinux/kali-rolling
 
-ARG IMAGENAME=kali
+ARG IMAGE_NAME=kali
 
+# the base system
 RUN apt-get update \
 &&  apt-get upgrade -y \
 &&  apt-get install -y vim python3-dev netcat bsdmainutils sshpass gawk bash-completion curl \
@@ -39,7 +40,7 @@ COPY vimrc /root/.vimrc
 COPY rootme_ssh *-wrapper /usr/local/bin/
 RUN /usr/local/bin/rootme_ssh --add
 
-VOLUME /${IMAGENAME}
-WORKDIR /${IMAGENAME}
+VOLUME /${IMAGE_NAME}
+WORKDIR /${IMAGE_NAME}
 
 CMD ["bash", "-l"]
