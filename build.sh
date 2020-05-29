@@ -2,14 +2,16 @@
 
 IMAGE_NAME=${IMAGE_NAME:-kali}
 
+echo "build ${IMAGE_NAME} $1 ..."
+
 if [[ "$1" == "arm" ]]; then
     docker buildx build --pull --platform linux/arm/v7 -t ${IMAGE_NAME}:arm --load --build-arg IMAGE_NAME=${IMAGE_NAME} .
 elif [[ "$1" == "arm64" ]]; then
     docker buildx build --pull --platform linux/arm64 -t ${IMAGE_NAME}:arm64 --load --build-arg IMAGE_NAME=${IMAGE_NAME} .
 elif [[ "$1" == "crypto" ]]; then
-    docker build --pull --tag ${IMAGE_NAME}:crypto -f Dockerfile-crypto .
+    docker build --pull --tag ${IMAGE_NAME}:crypto -f Dockerfile-crypto --build-arg IMAGE_NAME=${IMAGE_NAME} .
 else
-    docker build --pull --tag ${IMAGE_NAME} .
+    docker build --pull --tag ${IMAGE_NAME} --build-arg IMAGE_NAME=${IMAGE_NAME} .
 fi
 
 if [ -d $HOME/.local/bin ]; then

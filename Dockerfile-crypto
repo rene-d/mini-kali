@@ -1,6 +1,6 @@
-FROM kalilinux/kali-rolling
-
 ARG IMAGE_NAME=kali
+
+FROM kalilinux/kali-rolling
 
 # the base system
 RUN apt-get update \
@@ -29,9 +29,11 @@ RUN set -ex \
 &&  apt-get install -y libgmp3-dev libmpc-dev git \
 &&  apt-get clean \
 &&  mkdir -p /opt/tools \
+&&  cd /opt/tools \
 &&  git clone --depth=1 https://github.com/Ganapati/RsaCtfTool \
 &&  cd RsaCtfTool \
-&&  pip3 install --no-cache-dir -r requirements.txt -r optional-requirements.txt
+&&  pip3 install --no-cache-dir -r requirements.txt -r optional-requirements.txt \
+&&  ln -rsf RsaCtfTool.py /usr/local/bin/RsaCtfTool
 
 # the user profile
 RUN ln -f /etc/skel/.bashrc /root/.bashrc
@@ -39,6 +41,8 @@ COPY bash_aliases /root/.bash_aliases
 COPY vimrc /root/.vimrc
 COPY rootme_ssh *-wrapper /usr/local/bin/
 RUN /usr/local/bin/rootme_ssh --add
+
+ARG IMAGE_NAME
 
 VOLUME /${IMAGE_NAME}
 WORKDIR /${IMAGE_NAME}
