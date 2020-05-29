@@ -1,4 +1,5 @@
+.vscode/
 build.sh
 run.sh
-LICENSE
 README.md
+LICENSE
