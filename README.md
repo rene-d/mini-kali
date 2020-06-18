@@ -48,6 +48,8 @@ docker run --rm -it --ulimit stack=100000000:100000000 trailofbits/manticore bas
 * [Steganography Toolkit](https://github.com/DominicBreuker/stego-toolkit)
 
 * [Metasploit](https://github.com/rapid7/metasploit-framework)
+    - `docker run --rm -it -v "$HOME/.msf4:/home/msf/.msf4" metasploitframework/metasploit-framework ./msfconsole "$@"`
+    - `docker run --rm -it -v "$HOME/.msf4:/home/msf/.msf4" -v "$PWD:/data" metasploitframework/metasploit-framework ./msfvenom "$@"`
 * [Miasm](https://github.com/cea-sec/miasm) Reverse engineering framework in Python ([write-up](https://www.root-me.org/fr/Challenges/Cracking/PE-x64-Automatisation-du-crackme?action_solution=voir&debut_affiche_solutions=0#pagination_affiche_solutions))
 * [sleuthkit](https://www.sleuthkit.org) command line tools to analyze disk images ([write-up forensic](https://www.root-me.org/fr/Challenges/Forensic/Trouvez-le-chat?action_solution=voir#ancre_solution))
 * [volatility](https://www.volatilityfoundation.org)
@@ -61,6 +63,7 @@ docker run --rm -it --ulimit stack=100000000:100000000 trailofbits/manticore bas
 * [RSA attack tool (mainly for ctf)](https://github.com/Ganapati/RsaCtfTool)
 * https://github.com/ashutosh1206/Crypton
 * https://github.com/ValarDragon/CTF-Crypto
+* [SideChannelMarvels](https://github.com/SideChannelMarvels/)
 
 Blogs 🇫🇷
 * https://k-lfa.info
