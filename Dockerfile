@@ -6,7 +6,7 @@ FROM kalilinux/kali-rolling
 RUN [ "$(uname -m)" = "x86_64" ] && dpkg --add-architecture i386 || true \
 &&  apt-get update \
 &&  apt-get upgrade -y \
-&&  apt-get install -y --no-install-recommends build-essential file patch bzip2 xz-utils curl wget bash git openssh-client procps netbase dirmngr gnupg \
+&&  apt-get install -y --no-install-recommends build-essential file patch bzip2 xz-utils curl wget bash git openssh-client procps netbase dirmngr gnupg libssl-dev \
 &&  apt-get install -y gdb gdbserver strace vim upx python3-dev poppler-utils ruby netcat bsdmainutils sshpass gawk bash-completion \
 &&  apt-get install -y radare2 \
 &&  [ "$(uname -m)" = "x86_64" ] && apt-get install -y binwalk ltrace libc6-i386 gcc-multilib g++-multilib john foremost sqlmap || true \
@@ -76,5 +76,8 @@ ARG IMAGE_NAME
 
 VOLUME /${IMAGE_NAME}
 WORKDIR /${IMAGE_NAME}
+
+# too many six.py are present... 
+RUN rm  /usr/local/lib/python3.8/dist-packages/six.py
 
 CMD ["bash", "-l"]
