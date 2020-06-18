@@ -12,3 +12,5 @@ set shiftwidth=4
 set expandtab
 set hlsearch
 
+filetype plugin on
+filetype plugin indent on
