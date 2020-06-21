@@ -163,7 +163,7 @@ app-script-ch20
 
 if [ "$1" = "--add" ]; then
     mkdir -p /root/.ssh
-    cat <<'EOF' > /root/.ssh/config
+    cat <<'EOF' >> /root/.ssh/config
 # Allow specifying passwords for Host entries, to be parsed by ssh-wrapper.
 IgnoreUnknown Password
 EOF
