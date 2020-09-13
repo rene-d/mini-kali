@@ -44,6 +44,7 @@ docker run --rm -it --ulimit stack=100000000:100000000 trailofbits/manticore bas
 
 ## Other links (not exhaustive)
 
+* Linux syscalls [x86_64](https://filippo.io/linux-syscall-table/) [i386](http://shell-storm.org/shellcode/files/syscalls.html)
 * [peepdf](https://github.com/jesparza/peepdf)
 * [Steganography Toolkit](https://github.com/DominicBreuker/stego-toolkit)
 
@@ -61,9 +62,10 @@ docker run --rm -it --ulimit stack=100000000:100000000 trailofbits/manticore bas
 * [vivisect/vivisect](https://github.com/vivisect/vivisect)
 
 * [RSA attack tool (mainly for ctf)](https://github.com/Ganapati/RsaCtfTool)
-* https://github.com/ashutosh1206/Crypton
-* https://github.com/ValarDragon/CTF-Crypto
+* [Crypton](https://github.com/ashutosh1206/Crypton)
+* [CTF Crypto](https://github.com/ValarDragon/CTF-Crypto)
 * [SideChannelMarvels](https://github.com/SideChannelMarvels/)
+* [PatchELF](https://github.com/NixOS/patchelf)
 
 Blogs 🇫🇷
 * https://k-lfa.info
