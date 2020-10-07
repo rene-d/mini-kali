@@ -79,5 +79,6 @@ WORKDIR /${IMAGE_NAME}
 
 # too many six.py are present... 
 RUN rm  /usr/local/lib/python3.8/dist-packages/six.py
+RUN touch ~/.hushlogin
 
 CMD ["bash", "-l"]
