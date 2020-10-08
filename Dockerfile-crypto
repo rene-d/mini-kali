@@ -21,8 +21,8 @@ ENV LC_ALL en_US.UTF-8
 # get last version of pip
 RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 -
 
-RUN apt-get install -y --no-install-recommends sagemath \
-&&  apt-get clean
+#RUN apt-get install -y --no-install-recommends sagemath \
+#&&  apt-get clean
 
 # the tools
 RUN set -ex \
