@@ -1,34 +1,46 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
-IMAGE_NAME=${IMAGE_NAME:-kali}
+set -euo pipefail
 
-echo "build ${IMAGE_NAME} $1 ..."
+target=${1:-amd64}
+image_name=${IMAGE_NAME:-kali}
+bindir=${HOME}/.local/bin
+
+echo "build ${image_name} ${target} ..."
 
 if [[ "$1" == "arm" ]]; then
-    docker buildx build --pull --platform linux/arm/v7 -t ${IMAGE_NAME}:arm --load --build-arg IMAGE_NAME=${IMAGE_NAME} -f Dockerfile-arm .
+    docker build --pull --platform linux/arm/v7 --tag ${image_name}:arm --build-arg IMAGE_NAME=${image_name} --file Dockerfile-arm .
 elif [[ "$1" == "arm64" ]]; then
-    docker buildx build --pull --platform linux/arm64 -t ${IMAGE_NAME}:arm64 --load --build-arg IMAGE_NAME=${IMAGE_NAME} -f Dockerfile-arm .
+    docker build --pull --platform linux/arm64 --tag ${image_name}:arm64 --build-arg IMAGE_NAME=${image_name} --file Dockerfile-arm .
 elif [[ "$1" == "crypto" ]]; then
-    docker build --pull --tag ${IMAGE_NAME}:crypto -f Dockerfile-crypto --build-arg IMAGE_NAME=${IMAGE_NAME} .
+    docker build --pull --tag ${image_name}:crypto --build-arg IMAGE_NAME=${image_name} --file Dockerfile-crypto .
+elif [[ "$1" == "amd64" ]]; then
+    docker build --pull --tag ${image_name} --build-arg IMAGE_NAME=${image_name} .
 elif [[ "$1" == "all" ]]; then
-    export IMAGE_NAME
+    export IMAGE_NAME=${image_name}
     $0
     $0 crypto
     $0 arm
     $0 arm64
-else
-    docker build --pull --tag ${IMAGE_NAME} --build-arg IMAGE_NAME=${IMAGE_NAME} .
+elif [[ "$1" != "install" ]]; then
+    echo 2>&1 "Unknown target: ${target}"
+    exit 2
 fi
 
-if [ -d $HOME/.local/bin ]; then
-    env IMAGE_NAME=${IMAGE_NAME} envsubst '$IMAGE_NAME' < run.sh > $HOME/.local/bin/${IMAGE_NAME}
-    chmod a+x $HOME/.local/bin/${IMAGE_NAME}
-    touch -r run.sh $HOME/.local/bin/${IMAGE_NAME}
 
-    ln -sf ${IMAGE_NAME} $HOME/.local/bin/${IMAGE_NAME}-attach
-    ln -sf ${IMAGE_NAME} $HOME/.local/bin/${IMAGE_NAME}-arm
-    ln -sf ${IMAGE_NAME} $HOME/.local/bin/${IMAGE_NAME}-arm64
-    ln -sf ${IMAGE_NAME} $HOME/.local/bin/${IMAGE_NAME}-crypto
+mkdir -p ${bindir}
+
+env IMAGE_NAME=${image_name} envsubst '$IMAGE_NAME' < run.sh > ${bindir}/${image_name}
+chmod a+x ${bindir}/${image_name}
+touch -r run.sh ${bindir}/${image_name}
+
+ln -sf ${image_name} ${bindir}/${image_name}-attach
+ln -sf ${image_name} ${bindir}/${image_name}-arm
+ln -sf ${image_name} ${bindir}/${image_name}-arm64
+ln -sf ${image_name} ${bindir}/${image_name}-crypto
+
+if [[ "$(which ${image_name}-attach)" != "$(realpath -s ${bindir}/${image_name}-attach)" ]]; then
+    echo "You should add ${bindir} to your PATH in order to easily run the containers."
 else
-    echo "You should add an alias to your .bashrc/.zshrc in order to run the container"
+    echo "Launch scripts have been installed into ${bindir}"
 fi
