@@ -1,30 +1,57 @@
 #!/usr/bin/env bash
 
-progname=$(basename "$0")
+progname=$(basename "$BASH_SOURCE")
+image_name=${IMAGE_NAME}
+
+
+# find the first free container id
+function find_name()
+{
+    declare -a names
+    local free_name
+    local i
+
+    names=($(docker container ls --format '{{.Names}}' --filter "label=${image_name}"))
+    i=0
+    while true; do
+        i=$((i + 1))
+        free_name=${image_name}_${i}
+        for name in ${names[*]}; do
+            if [[ $name == ${free_name} ]]; then
+                free_name=
+                break
+            fi
+        done
+        if [[ ${free_name} != "" ]]; then
+            break
+        fi
+    done
+
+    echo ${free_name}
+}
+
 
 # run the native container (amd64/i386)
+# run the arm/v7 container
+# run the arm64 container
+# run the crypto/SageMath container
 function run()
 {
-    exec docker run --rm -ti --label ${IMAGE_NAME} --hostname ${IMAGE_NAME} -v "$PWD":/${IMAGE_NAME} --cap-add=SYS_PTRACE ${IMAGE_NAME} $*
+    local name=$(find_name)
+    local flavor=$1
+    local tag=${flavor:-latest}
+    shift
+
+    exec docker run --rm -ti \
+            --name ${name} \
+            --label ${image_name} \
+            --hostname ${image_name} \
+            -v "$PWD":/${image_name} \
+            --cap-add=SYS_PTRACE \
+            -e flavor=${flavor} \
+            ${image_name}:${tag} $*
 }
 
-# run the arm/v7 container
-function arm()
-{
-    exec docker run --rm -ti --label ${IMAGE_NAME} --hostname ${IMAGE_NAME} -v "$PWD":/${IMAGE_NAME} --cap-add=SYS_PTRACE -e flavor=arm ${IMAGE_NAME}:arm $*
-}
-
-# run the arm64 container
-function arm64()
-{
-    exec docker run --rm -ti --label ${IMAGE_NAME} --hostname ${IMAGE_NAME} -v "$PWD":/${IMAGE_NAME} --cap-add=SYS_PTRACE -e flavor=arm64 ${IMAGE_NAME}:arm64 $*
-}
-
-# run the crypto/SageMath container
-function crypto()
-{
-    exec docker run --rm -ti --label ${IMAGE_NAME} --hostname ${IMAGE_NAME} -v "$PWD":/${IMAGE_NAME} -e flavor=crypto ${IMAGE_NAME}:crypto $*
-}
 
 # attach to a running container
 function attach()
@@ -35,40 +62,30 @@ function attach()
     fi
 
     if [[ "$1" == "list" ]]; then
-        docker container ls  --filter 'label=${IMAGE_NAME}' --format '{{.ID}}\t{{.Status}}\t{{.Image}}\t{{.Command}}'
+        docker container ls  --filter "label=${image_name}" --format '{{.Names}}\t{{.Status}}\t{{.Image}}\t{{.Command}}'
         exit
     fi
 
+    local n=$1
     declare -a ids
 
-    ids=($(docker container ls --format '{{.ID}}' --filter 'label=${IMAGE_NAME}'))
-    nb=${#ids[@]}
+    ids=($(docker container ls --format '{{.ID}}' --filter "label=${image_name}" --filter "name=${image_name}_${n}"))
 
-    if [ "${nb}" -eq 1 ]; then
-        n=0
-    elif [[ "$1" == "" ]]; then
-        echo "${nb} containers are running, please choose one"
-        exit
+    if [[ ${#ids[@]} != 1 ]]; then
+        echo "Invalid container number ($n), available ones are:"
+        attach list
     else
-        n=$(($1))
-        if [ $n -lt 0 -o $n -ge $nb ]; then
-            echo "Invalid container number ($n), should be 0 ≤ n < ${nb}"
-            exit
-        fi
-    fi
+        local instance=$(docker container ls --format '{{.Names}}' --filter "id=${ids[0]}")
+        instance=${instance##${image_name}_}
 
-    exec docker exec -ti -e instance=$n ${ids[$n]} bash
+        exec docker exec -ti -e instance=${instance} ${ids[0]} bash
+    fi
 }
 
 
 if [[ "$progname" =~ ^.*\-attach$ ]]; then
     attach $*
-elif [[ "$progname" =~ ^.*\-arm$ ]]; then
-    arm $*
-elif [[ "$progname" =~ ^.*\-arm64$ ]]; then
-    arm64 $*
-elif [[ "$progname" =~ ^.*\-crypto$ ]]; then
-    crypto $*
 else
-    run $*
+    shopt -s extglob  # rtfm before whining
+    run ${progname##${image_name}?(-)} $*
 fi
