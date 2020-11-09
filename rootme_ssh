@@ -162,14 +162,14 @@ app-script-ch20
 )
 
 if [ "$1" = "--add" ]; then
-    mkdir -p /root/.ssh
-    cat <<'EOF' >> /root/.ssh/config
+    mkdir -p $HOME/.ssh
+    cat <<'EOF' >> $HOME/.ssh/config
 # Allow specifying passwords for Host entries, to be parsed by ssh-wrapper.
 IgnoreUnknown Password
 EOF
     add_one()
     {
-            cat <<EOF >> /root/.ssh/config
+            cat <<EOF >> $HOME/.ssh/config
 
 Host $1
     User $2

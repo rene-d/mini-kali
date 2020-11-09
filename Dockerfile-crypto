@@ -1,11 +1,14 @@
 ARG IMAGE_NAME=kali
 
-FROM debian:sid
+FROM sagemath/sagemath:latest
+
+USER root
 
 # the base system
 RUN apt-get update \
 &&  apt-get upgrade -y \
-&&  apt-get install -y vim python3-dev netcat bsdmainutils sshpass gawk bash-completion curl \
+&&  apt-get install -y vim python3-dev netcat bsdmainutils sshpass gawk bash-completion curl wget unzip htop \
+                       libgmp3-dev libmpc-dev \
 &&  apt-get clean
 
 # set locales to UTF-8
@@ -18,32 +21,27 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 
-# get last version of pip
-RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 -
-
-# install SageMath
-RUN apt-get install -y --no-install-recommends sagemath
-
 # more tools
 RUN set -ex \
 &&  mkdir -p /opt/tools \
-&&  cd /opt/tools \
-# &&  apt-get install -y libgmp3-dev libmpc-dev git \
-# &&  apt-get clean \
-# &&  git clone --depth=1 https://github.com/Ganapati/RsaCtfTool \
-# &&  cd RsaCtfTool \
-# &&  pip3 install --no-cache-dir -r requirements.txt -r optional-requirements.txt \
-&&  curl -sL -o/tmp/master.zip https://github.com/Ganapati/RsaCtfTool/archive/master.zip \
-&&  unzip -q -d /opt /tmp/master.zip \
-&&  rm /tmp/master.zip \
-&&  pip3 install --no-cache-dir cryptography pycryptodome \
-&&  ln -rsf /opt/RsaCtfTool-master/RsaCtfTool.py /usr/local/bin/RsaCtfTool
+\
+# https://github.com/Ganapati/RsaCtfTool
+&&  curl -o /tmp/RsaCtfTool-master.zip -skL https://codeload.github.com/Ganapati/RsaCtfTool/zip/master \
+&&  unzip -d /opt/tool /tmp/RsaCtfTool-master.zip \
+&&  sudo -u sage /home/sage/sage/local/bin/pip3 install -r /opt/tool/RsaCtfTool-master/requirements.txt \
+&&  rm /tmp/RsaCtfTool-master.zip \
+&&  ln -sf /opt/tool/RsaCtfTool-master/RsaCtfTool.py /usr/local/bin/RsaCtfTool
+
+# must be copied as root
+COPY rootme_ssh *-wrapper /usr/local/bin/
+
+USER sage
+WORKDIR /home/sage
 
 # the user profile
-RUN ln -f /etc/skel/.bashrc /root/.bashrc
-COPY bash_aliases /root/.bash_aliases
-COPY vimrc /root/.vimrc
-COPY rootme_ssh *-wrapper /usr/local/bin/
+# RUN ln -f /etc/skel/.bashrc .bashrc
+COPY bash_aliases .bash_aliases
+COPY vimrc .vimrc
 RUN /usr/local/bin/rootme_ssh --add
 
 ARG IMAGE_NAME
