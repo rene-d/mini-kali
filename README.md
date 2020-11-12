@@ -1,5 +1,11 @@
 # Mini-Kali
 
+![Docker Automated build](https://img.shields.io/docker/automated/rene2/mini-kali)
+![Docker Build Status](https://img.shields.io/docker/build/rene2/mini-kali)
+![Docker Pulls](https://img.shields.io/docker/pulls/rene2/mini-kali)
+
+
+
 Hacking tools in a Docker image.
 
 ![docker](https://www.docker.com/sites/default/files/d8/2019-07/horizontal-logo-monochromatic-white.png)

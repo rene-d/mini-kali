@@ -1,6 +1,6 @@
 ARG IMAGE_NAME=kali
 
-FROM kalilinux/kali-rolling
+FROM kalilinux/kali-rolling:latest
 
 # the base system
 RUN [ "$(uname -m)" = "x86_64" ] && dpkg --add-architecture i386 || true \
