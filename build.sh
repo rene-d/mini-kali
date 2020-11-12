@@ -6,6 +6,10 @@ target=${1:-amd64}
 image_name=${IMAGE_NAME:-kali}
 bindir=${HOME}/.local/bin
 
+if [ $# -eq 0 ]; then
+    exec $0 amd64
+fi    
+
 echo "build ${image_name} ${target} ..."
 
 if [[ "$1" == "arm" ]]; then
