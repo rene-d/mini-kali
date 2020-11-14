@@ -3,13 +3,13 @@ ARG IMAGE_NAME=kali
 FROM kalilinux/kali-rolling:latest
 
 # the base system
-RUN [ "$(uname -m)" = "x86_64" ] && dpkg --add-architecture i386 || true \
+RUN dpkg --add-architecture i386 || true \
 &&  apt-get update \
 &&  apt-get upgrade -y \
 &&  apt-get install -y --no-install-recommends build-essential file patch bzip2 xz-utils curl wget bash git openssh-client procps netbase dirmngr gnupg libssl-dev \
 &&  apt-get install -y gdb gdbserver strace vim upx python3-dev poppler-utils ruby netcat bsdmainutils sshpass gawk bash-completion \
 &&  apt-get install -y radare2 \
-&&  [ "$(uname -m)" = "x86_64" ] && apt-get install -y binwalk ltrace libc6-i386 gcc-multilib g++-multilib john foremost sqlmap || true \
+&&  apt-get install -y binwalk ltrace libc6-i386 gcc-multilib g++-multilib john foremost sqlmap || true \
 &&  apt-get clean
 
 # set locales to UTF-8
@@ -49,8 +49,7 @@ RUN set -ex \
 &&  git clone --depth 1 https://github.com/wapiflapi/villoc.git /opt/tools/villoc \
 &&  ln -rsf /opt/tools/villoc/villoc.py /usr/local/bin/villoc
 
-RUN set -ex \
-&&  if [ "$(uname -m)" = "x86_64" ] ; then \
+RUN set -ex ;\
 \
 # zsteg: https://github.com/zed-0xff/zsteg
 gem install zsteg ;\
@@ -60,9 +59,7 @@ pip3 install --no-cache-dir angr ;\
 \
 # https://blog.didierstevens.com/programs/pdf-tools/
 curl -sL http://didierstevens.com/files/software/pdf-parser_V0_7_4.zip | funzip > /usr/local/bin/pdf-parser.py ;\
-chmod a+x /usr/local/bin/pdf-parser.py ;\
-\
-fi
+chmod a+x /usr/local/bin/pdf-parser.py
 
 # the user profile
 RUN ln -f /etc/skel/.bashrc /root/.bashrc
@@ -77,7 +74,7 @@ ARG IMAGE_NAME
 VOLUME /${IMAGE_NAME}
 WORKDIR /${IMAGE_NAME}
 
-# too many six.py are present... 
+# too many six.py are present...
 RUN rm  /usr/local/lib/python3.8/dist-packages/six.py
 RUN touch ~/.hushlogin
 
