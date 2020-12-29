@@ -11,7 +11,7 @@ function find_name()
     local free_name
     local i
 
-    names=($(docker container ls --format '{{.Names}}' --filter "label=${image_name}"))
+    names=($(docker container ls --format {{.Names}} --filter label=${image_name}))
     i=0
     while true; do
         i=$((i + 1))
@@ -31,24 +31,38 @@ function find_name()
 }
 
 
-# run the native container (amd64/i386)
+# run the amd64/i386 container
 # run the arm/v7 container
 # run the arm64 container
 # run the crypto/SageMath container
 function run()
 {
     local name=$(find_name)
-    local flavor=$1
-    local tag=${flavor:-latest}
+    local tag=$1
     shift
 
+    if [[ -z "${tag}" ]]; then
+        case "$(uname -m)" in
+            x86_64) tag=amd64 ;;
+            arm64) tag=arm64 ;;
+            *) echo >&2 "Unsupported arch: $(uname -m)"; exit 2 ;;
+        esac
+    fi
+
+    # for now, sagemath image is only available for linux/amd64
+    local ptf=linux/${tag}
+    if [[ "${tag}" == "crypto" ]]; then
+        ptf=linux/amd64
+    fi
+
     exec docker run --rm -ti \
+            --platform ${ptf} \
             --name ${name} \
             --label ${image_name} \
             --hostname ${image_name} \
             -v "$PWD":/${image_name} \
             --cap-add=SYS_PTRACE \
-            -e flavor=${flavor} \
+            -e flavor=${tag} \
             ${image_name}:${tag} $*
 }
 

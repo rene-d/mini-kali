@@ -2,5 +2,6 @@
     "files.associations": {
         "Dockerfile-*": "dockerfile",
         "bash_aliases": "shellscript"
-    }
+    },
+    "python.pythonPath": "/opt/homebrew/bin/python3"
 }

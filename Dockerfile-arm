@@ -1,14 +1,16 @@
 ARG IMAGE_NAME=kali
 
-FROM debian:testing
+FROM kalilinux/kali-rolling:latest
 
 # the base system
 RUN apt-get update \
 &&  apt-get upgrade -y \
 &&  apt-get install -y --no-install-recommends build-essential file patch bzip2 xz-utils curl wget bash git openssh-client procps netbase dirmngr gnupg libssl-dev libffi-dev \
 &&  apt-get install -y gdb gdbserver strace vim upx python3-dev poppler-utils ruby netcat bsdmainutils sshpass gawk bash-completion \
-#RUN apt-get install -y radare2 
+#RUN apt-get install -y radare2
 &&  apt-get clean
+
+
 
 # set locales to UTF-8
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
@@ -48,6 +50,18 @@ RUN set -ex \
 &&  git clone --depth 1 https://github.com/wapiflapi/villoc.git /opt/tools/villoc \
 &&  ln -rsf /opt/tools/villoc/villoc.py /usr/local/bin/villoc
 
+RUN set -ex ;\
+\
+# zsteg: https://github.com/zed-0xff/zsteg
+gem install zsteg ;\
+\
+# http://angr.io
+pip3 install --no-cache-dir angr ;\
+\
+# https://blog.didierstevens.com/programs/pdf-tools/
+curl -sL http://didierstevens.com/files/software/pdf-parser_V0_7_4.zip | funzip > /usr/local/bin/pdf-parser.py ;\
+chmod a+x /usr/local/bin/pdf-parser.py
+
 # the user profile
 RUN ln -f /etc/skel/.bashrc /root/.bashrc
 COPY bash_aliases /root/.bash_aliases
@@ -60,5 +74,9 @@ ARG IMAGE_NAME
 
 VOLUME /${IMAGE_NAME}
 WORKDIR /${IMAGE_NAME}
+
+# too many six.py are present...
+RUN rm -f /usr/local/lib/python3.8/dist-packages/six.py
+RUN touch ~/.hushlogin
 
 CMD ["bash", "-l"]

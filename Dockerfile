@@ -17,7 +17,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
 &&  sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
 &&  locale-gen en_US.UTF-8 \
 &&  dpkg-reconfigure --frontend=noninteractive locales \
-&&  /usr/sbin/update-locale LANG=en_US.UTF-8
+&&  /usr/sbin/update-locale LANG=en_US.UTF-8 \
+&&  apt-get clean
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
@@ -75,7 +76,7 @@ VOLUME /${IMAGE_NAME}
 WORKDIR /${IMAGE_NAME}
 
 # too many six.py are present...
-RUN rm  /usr/local/lib/python3.8/dist-packages/six.py
+RUN rm -f /usr/local/lib/python3.8/dist-packages/six.py
 RUN touch ~/.hushlogin
 
 CMD ["bash", "-l"]

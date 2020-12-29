@@ -5,6 +5,12 @@ set -euo pipefail
 image_name=${IMAGE_NAME:-kali}
 bindir=${HOME}/.local/bin
 
+case "$(uname -m)" in
+    x86_64) my_arch=amd64 ;;
+    arm64) my_arch=arm64 ;;
+    *) my_arch= ;;
+esac
+
 
 do_install()
 {
@@ -16,12 +22,14 @@ do_install()
     chmod a+x "${bindir}/${image_name}"
     touch -r "${run_sh}" "${bindir}/${image_name}"
 
-    ln -sf ${image_name} ${bindir}/${image_name}-attach
-    ln -sf ${image_name} ${bindir}/${image_name}-arm
-    ln -sf ${image_name} ${bindir}/${image_name}-arm64
-    ln -sf ${image_name} ${bindir}/${image_name}-crypto
+    ln -sf ${image_name} "${bindir}/${image_name}-attach"
 
-    if [[ "$(which ""${image_name}-attach"")" != "$(realpath -s ""${bindir}/${image_name}-attach"")" ]]; then
+    for tag in $(docker image ls --format {{.Tag}} --filter reference=${image_name}); do
+        ln -sf ${image_name} "${bindir}/${image_name}-${tag}"
+        echo "symlink ${bindir}/${image_name}-${tag}"
+    done
+
+    if [[ "$(/usr/bin/which ""${image_name}-attach"")" != "$(realpath -s ""${bindir}/${image_name}-attach"")" ]]; then
         echo "You should add « ${bindir} » to your PATH in order to easily run the containers."
     else
         echo "Launch scripts have been installed into « ${bindir} »"
@@ -64,7 +72,7 @@ do_build()
     elif [[ "$target" == "amd64" ]]; then
         docker build \
                 --pull \
-                --tag ${image_name} \
+                --tag ${image_name}:amd64 \
                 --build-arg IMAGE_NAME=${image_name} \
                 .
 
@@ -85,17 +93,20 @@ do_build()
 
 usage()
 {
-    echo "Usage: $0 [-n <IMAGE_NAME>] [-p <BINDIR>]" 1>&2; exit 1;
+    echo "Usage: $0 [-n <IMAGE_NAME>] [-p <BINDIR>] [-i]" 1>&2; exit 1;
 }
 
-
-while getopts ":n:p:" o; do
+install_only=
+while getopts ":n:p:i" o; do
     case "${o}" in
         n)
             image_name=${OPTARG}
             ;;
         p)
             bindir=${OPTARG}
+            ;;
+        i)
+            install_only=1
             ;;
         *)
             usage
@@ -108,10 +119,20 @@ if [ -z "${image_name}" ] || [ -z "${bindir}" ]; then
     usage
 fi
 
+# install only
+if [[ "$install_only" ]]; then
+    do_install
+    exit
+fi
 
-#  target
+# build
 if [ $# -eq 0 ]; then
-    do_build amd64
+    # current arch
+    if [[ -z "${my_arch}" ]]; then
+        echo >&2 "Unsupported arch: $(uname -m)"
+        exit 2
+    fi
+    do_build ${my_arch}
 else
     while [ $# -ne 0 ]; do
         do_build $1
