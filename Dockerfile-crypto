@@ -5,32 +5,33 @@ FROM sagemath/sagemath:latest
 USER root
 
 # the base system
-RUN apt-get update \
-&&  apt-get upgrade -y \
-&&  apt-get install -y vim python3-dev netcat bsdmainutils sshpass gawk bash-completion curl wget unzip htop \
-                       libgmp3-dev libmpc-dev \
-&&  apt-get clean
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y vim python3-dev netcat bsdmainutils sshpass gawk bash-completion curl wget unzip htop && \
+    libgmp3-dev libmpc-dev && \
+    apt-get clean
 
 # set locales to UTF-8
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
-&&  sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
-&&  locale-gen en_US.UTF-8 \
-&&  dpkg-reconfigure --frontend=noninteractive locales \
-&&  /usr/sbin/update-locale LANG=en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
-ENV LC_ALL en_US.UTF-8
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y locales && \
+    sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen en_US.UTF-8 && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    /usr/sbin/update-locale LANG=en_US.UTF-8 && \
+    apt-get clean
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
 
 # more tools
-RUN set -ex \
-&&  mkdir -p /opt/tools \
-\
-# https://github.com/Ganapati/RsaCtfTool
-&&  curl -o /tmp/RsaCtfTool-master.zip -skL https://codeload.github.com/Ganapati/RsaCtfTool/zip/master \
-&&  unzip -d /opt/tool /tmp/RsaCtfTool-master.zip \
-&&  sudo -u sage /home/sage/sage/local/bin/pip3 install -r /opt/tool/RsaCtfTool-master/requirements.txt \
-&&  rm /tmp/RsaCtfTool-master.zip \
-&&  ln -sf /opt/tool/RsaCtfTool-master/RsaCtfTool.py /usr/local/bin/RsaCtfTool
+RUN set -ex && \
+    mkdir -p /opt/tools && \
+    \
+    # https://github.com/Ganapati/RsaCtfTool
+    curl -o /tmp/RsaCtfTool-master.zip -skL https://codeload.github.com/Ganapati/RsaCtfTool/zip/master && \
+    unzip -d /opt/tool /tmp/RsaCtfTool-master.zip && \
+    sudo -u sage /home/sage/sage/local/bin/pip3 install -r /opt/tool/RsaCtfTool-master/requirements.txt && \
+    rm /tmp/RsaCtfTool-master.zip && \
+    ln -sf /opt/tool/RsaCtfTool-master/RsaCtfTool.py /usr/local/bin/RsaCtfTool
 
 # must be copied as root
 COPY rootme_ssh *-wrapper /usr/local/bin/

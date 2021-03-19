@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -xeuo pipefail
 
 image_name=${IMAGE_NAME:-kali}
 bindir=${HOME}/.local/bin
 
-case "$(uname -m)" in
+case "$(arch)" in
     x86_64) my_arch=amd64 ;;
     arm64) my_arch=arm64 ;;
     *) my_arch= ;;
