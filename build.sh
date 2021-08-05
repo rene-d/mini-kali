@@ -5,9 +5,10 @@ set -xeuo pipefail
 image_name=${IMAGE_NAME:-kali}
 bindir=${HOME}/.local/bin
 
-case "$(arch)" in
+case "$(uname -m)" in
     x86_64) my_arch=amd64 ;;
-    arm64) my_arch=arm64 ;;
+    arm64 | aarch64 | armv8 | armv9) my_arch=arm64 ;;
+    armhf | armv7l | armv7 | armv6) my_arch=arm ;;
     *) my_arch= ;;
 esac
 

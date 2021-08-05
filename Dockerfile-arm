@@ -10,7 +10,7 @@ RUN apt-get update && \
     apt-get install -y gdb gdbserver strace vim upx python3-dev poppler-utils ruby netcat bsdmainutils sshpass gawk bash-completion && \
     apt-get install -y --no-install-recommends libffi-dev && \
     apt-get install -y radare2 && \
-    apt-get install -y no-install-recommends binwalk && \
+    apt-get install -y --no-install-recommends binwalk && \
     apt-get install -y john foremost sqlmap && \
     apt-get clean
 
