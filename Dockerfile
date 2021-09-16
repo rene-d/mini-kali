@@ -8,10 +8,10 @@ RUN dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends build-essential file patch bzip2 xz-utils curl wget bash git openssh-client procps netbase dirmngr gnupg libssl-dev && \
-    apt-get install -y gdb gdbserver strace vim upx python3-dev poppler-utils ruby netcat bsdmainutils sshpass gawk bash-completion && \
+    apt-get install -y gdb gdbserver strace vim upx python3-dev poppler-utils ruby netcat-traditional bsdmainutils sshpass gawk bash-completion && \
     apt-get install -y ltrace libc6-i386 gcc-multilib g++-multilib && \
     apt-get install -y radare2 && \
-    apt-get install -y no-install-recommends binwalk && \
+    apt-get install -y --no-install-recommends binwalk && \
     apt-get install -y john foremost sqlmap && \
     apt-get clean
 

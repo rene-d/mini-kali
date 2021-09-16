@@ -56,6 +56,7 @@ function run()
     fi
 
     exec docker run --rm -ti \
+            -v $HOME/.vscode-server:/root/.vscode-server \
             --platform ${ptf} \
             --name ${name} \
             --label ${image_name} \

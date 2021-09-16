@@ -6,11 +6,11 @@ FROM debian:sid
 # the base system
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends build-essential file patch bzip2 xz-utils curl wget bash git openssh-client procps netbase dirmngr gnupg libssl-dev && \
-    apt-get install -y gdb gdbserver strace vim upx python3-dev poppler-utils ruby netcat bsdmainutils sshpass gawk bash-completion && \
+    apt-get install -y --no-install-recommends build-essential file patch bzip2 xz-utils curl wget bash git openssh-client procps netbase dirmngr gnupg libssl-dev cmake && \
+    apt-get install -y gdb gdbserver strace vim upx python3-dev poppler-utils ruby netcat-traditional bsdmainutils sshpass gawk bash-completion && \
     apt-get install -y --no-install-recommends libffi-dev && \
     apt-get install -y radare2 && \
-    apt-get install -y no-install-recommends binwalk && \
+    apt-get install -y --no-install-recommends binwalk && \
     apt-get install -y john foremost sqlmap && \
     apt-get clean
 
@@ -59,7 +59,7 @@ RUN set -ex ;\
     gem install zsteg ;\
     \
     # http://angr.io
-    pip3 install --no-cache-dir angr ;\
+#    pip3 install --no-cache-dir angr ;\
     \
     # https://blog.didierstevens.com/programs/pdf-tools/
     curl -sL http://didierstevens.com/files/software/pdf-parser_V0_7_4.zip | funzip > /usr/local/bin/pdf-parser.py ;\
