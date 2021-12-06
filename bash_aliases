@@ -4,6 +4,8 @@ alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 alias ll='ls -alF'
 alias la='ls -A'
+alias ff='find -name'
+alias gg='git grep -n'
 
 if [[ -z "${flavor}" ]]; then
     suffixe=""

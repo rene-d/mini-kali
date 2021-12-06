@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -xeuo pipefail
+set -Eeuo pipefail
 
 image_name=${IMAGE_NAME:-kali}
 bindir=${HOME}/.local/bin
