@@ -1,6 +1,5 @@
 ARG IMAGE_NAME=kali
 
-# FROM kalilinux/kali-rolling:arm64
 FROM debian:sid
 
 # the base system
@@ -25,7 +24,6 @@ ENV LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
-
 # get last version of pip
 RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 -
 
@@ -34,6 +32,7 @@ RUN set -ex && \
     mkdir -p /opt/tools && \
     \
     # http://docs.pwntools.com/ (+ ROPgadget)
+    pip3 --no-cache-dir install --upgrade unicorn && \
     pip3 --no-cache-dir install --upgrade pwntools && \
     \
     # gdb extensions
@@ -59,7 +58,7 @@ RUN set -ex ;\
     gem install zsteg ;\
     \
     # http://angr.io
-#    pip3 install --no-cache-dir angr ;\
+    # pip3 install --no-cache-dir angr ;\
     \
     # https://blog.didierstevens.com/programs/pdf-tools/
     curl -sL http://didierstevens.com/files/software/pdf-parser_V0_7_4.zip | funzip > /usr/local/bin/pdf-parser.py ;\
@@ -80,6 +79,8 @@ WORKDIR /${IMAGE_NAME}
 
 RUN touch ~/.hushlogin
 
-RUN apt-get install -y iproute2 redis libevent-dev libgtest-dev pkg-config make libglib2.0-dev libjansson-dev libhiredis-dev libuv1-dev inetutils-ping net-tools
+# some handy dev libraries and tools
+RUN apt-get install -y iproute2 redis inetutils-ping net-tools socat jq \
+    libevent-dev libgtest-dev pkg-config make libglib2.0-dev libjansson-dev libhiredis-dev libuv1-dev
 
 CMD ["bash", "-l"]

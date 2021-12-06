@@ -1,15 +1,15 @@
 ARG IMAGE_NAME=kali
 
-# FROM kalilinux/kali-rolling:latest
 FROM debian:sid
 
 # the base system
 RUN dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get upgrade -y && \
+    apt-get install -y ltrace libc6-i386 gcc-multilib g++-multilib && \
     apt-get install -y --no-install-recommends build-essential file patch bzip2 xz-utils curl wget bash git openssh-client procps netbase dirmngr gnupg libssl-dev && \
     apt-get install -y gdb gdbserver strace vim upx python3-dev poppler-utils ruby netcat-traditional bsdmainutils sshpass gawk bash-completion && \
-    apt-get install -y ltrace libc6-i386 gcc-multilib g++-multilib && \
+    apt-get install -y --no-install-recommends libffi-dev && \
     apt-get install -y radare2 && \
     apt-get install -y --no-install-recommends binwalk && \
     apt-get install -y john foremost sqlmap && \
@@ -33,7 +33,8 @@ RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 -
 RUN set -ex && \
     mkdir -p /opt/tools && \
     \
-    # http://docs.pwntools.com/  (+ ROPgadget)
+    # http://docs.pwntools.com/ (+ ROPgadget)
+    pip3 --no-cache-dir install --upgrade unicorn && \
     pip3 --no-cache-dir install --upgrade pwntools && \
     \
     # gdb extensions
@@ -78,8 +79,10 @@ ARG IMAGE_NAME
 VOLUME /${IMAGE_NAME}
 WORKDIR /${IMAGE_NAME}
 
-# too many six.py are present...
-RUN rm -f /usr/local/lib/python3.8/dist-packages/six.py
 RUN touch ~/.hushlogin
+
+# some handy dev libraries and tools
+RUN apt-get install -y iproute2 redis inetutils-ping net-tools socat jq \
+    libevent-dev libgtest-dev pkg-config make libglib2.0-dev libjansson-dev libhiredis-dev libuv1-dev
 
 CMD ["bash", "-l"]
