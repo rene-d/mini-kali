@@ -68,7 +68,7 @@ run()
 
     exec docker run --rm \
         ${opt_docker} \
-            -v $HOME/.vsco@de-server:/root/.vscode-server \
+            -v $HOME/.vscode-server:/root/.vscode-server \
             --platform ${ptf} \
             --name ${name} \
             --label ${image_name} \
