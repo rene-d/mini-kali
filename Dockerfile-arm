@@ -1,6 +1,7 @@
 ARG IMAGE_NAME=kali
 
-FROM debian:sid
+#FROM debian:sid
+FROM kalilinux/kali-rolling
 
 # the base system
 RUN apt-get update && \
