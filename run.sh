@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 progname=$(basename "${BASH_SOURCE[0]}")
-image_name=dgse
+image_name=kali
 
 # find the first free container id
 find_name()

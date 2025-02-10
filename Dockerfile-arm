@@ -26,13 +26,16 @@ ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
 # get last version of pip
-RUN curl -sL https://bootstrap.pypa.io/get-pip.py | python3 -
+RUN apt-get install -y --no-install-recommends python3-pip && \
+    python3 -m pip config set global.break-system-packages true && \
+    pip3 --no-cache-dir install --upgrade pip
 
 # the tools
 RUN set -ex && \
     mkdir -p /opt/tools && \
     \
     # http://docs.pwntools.com/ (+ ROPgadget)
+    pip3 --no-cache-dir install --upgrade capstone && \
     pip3 --no-cache-dir install --upgrade unicorn && \
     pip3 --no-cache-dir install --upgrade pwntools && \
     \
