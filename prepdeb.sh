@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+#
+# Install the mini-kali toolset on a Debian/Kali arm64 host (no Docker).
+# The package list mirrors the one of the Dockerfile.
+#
 
 if [[ $EUID != 0 ]]; then
     if [ -x /usr/bin/sudo ] ; then
@@ -11,20 +15,52 @@ fi
 
 apt-get update
 apt-get upgrade -y
-apt-get install -y --no-install-recommends build-essential file patch bzip2 xz-utils curl wget bash git openssh-client procps netbase dirmngr gnupg libssl-dev
-apt-get install -y gdb gdbserver strace vim upx python3-dev poppler-utils ruby netcat bsdmainutils sshpass gawk bash-completion
 
-# only in Kali distrib
-apt-get install -y radare2 || true
+# base system and build toolchain
+apt-get install -y --no-install-recommends \
+    bash bash-completion bsdmainutils build-essential bzip2 cmake curl dirmngr file \
+    git gawk gnupg htop netbase openssh-client patch pkg-config procps \
+    python3-dev python3-pip python3-setuptools sshpass unzip vim wget xxd xz-utils
 
-# get last version of pip
-curl -sL https://bootstrap.pypa.io/get-pip.py | python3 -
+# debug, disassembly and reverse engineering
+apt-get install -y gdb gdb-multiarch gdbserver strace ltrace checksec upx-ucl
+apt-get install -y --no-install-recommends \
+    binutils-arm-linux-gnueabihf binwalk hexedit \
+    python3-capstone python3-keystone-engine python3-ropgadget
 
-# the tools
+# only in the Kali repositories
+apt-get install -y radare2 ropper || true
+
+# forensics, steganography and password cracking
+apt-get install -y foremost john sqlmap steghide stegsnow zbar-tools
+apt-get install -y --no-install-recommends imagemagick libimage-exiftool-perl poppler-utils qpdf ruby ruby-dev
+
+# crypto (arbitrary precision arithmetic)
+apt-get install -y --no-install-recommends libgmp-dev libmpc-dev libmpfr-dev pari-gp
+
+# networking and handy dev libraries
+apt-get install -y iproute2 inetutils-ping jq net-tools netcat-traditional redis socat tcpdump
+apt-get install -y --no-install-recommends \
+    libevent-dev libffi-dev libglib2.0-dev libgtest-dev libhiredis-dev \
+    libjansson-dev libssl-dev libuv1-dev
+
+# uv: the Python package installer (https://docs.astral.sh/uv/)
+curl -LsSf https://astral.sh/uv/install.sh | \
+    env UV_INSTALL_DIR=/usr/local/bin INSTALLER_NO_MODIFY_PATH=1 sh
+
+# recent distributions are PEP 668 "externally managed" environments
+export UV_SYSTEM_PYTHON=1
+export UV_BREAK_SYSTEM_PACKAGES=1
+export UV_NO_CACHE=1
+export UV_PYTHON_DOWNLOADS=never
+
+# the python tools
+uv pip install --upgrade pwntools
+uv pip install --upgrade angr
+uv pip install --upgrade pycryptodome gmpy2 sympy z3-solver pyasn1 Pillow bitarray
+
+# the tools installed from their git repository
 mkdir -p /opt/tools
-
-# http://docs.pwntools.com/  (+ ROPgadget)
-pip3 --no-cache-dir install --upgrade pwntools
 
 # gdb extensions
 git clone --depth 1 https://github.com/longld/peda.git /opt/tools/peda
@@ -32,38 +68,21 @@ git clone --depth 1 https://github.com/hugsy/gef.git /opt/tools/gef
 git clone --depth 1 https://github.com/gdbinit/Gdbinit /opt/tools/Gdbinit
 git clone --depth 1 https://github.com/pwndbg/pwndbg /opt/tools/pwndbg
 
-# other tools
-git clone --depth 1 https://github.com/slimm609/checksec.sh /opt/tools/checksec.sh
-ln -rsf /opt/tools/checksec.sh/checksec /usr/local/bin/checksec
-
-# ropper, pyasn1, PIL, pycrypto
-pip3 install --no-cache-dir --upgrade ropper pyasn1 bitarray pycrypto
-
-# villoc: Visualization of heap operations.
+# villoc: visualization of heap operations
 git clone --depth 1 https://github.com/wapiflapi/villoc.git /opt/tools/villoc
 ln -rsf /opt/tools/villoc/villoc.py /usr/local/bin/villoc
 
+# RsaCtfTool: RSA attack tool (mainly for ctf)
+# it is a regular python package, which provides the RsaCtfTool command
+git clone --depth 1 https://github.com/RsaCtfTool/RsaCtfTool.git /opt/tools/RsaCtfTool
+uv pip install /opt/tools/RsaCtfTool
 
-if [ "$(uname -m)" = "x86_64" ] ; then
+# zsteg: https://github.com/zed-0xff/zsteg
+gem install --no-document zsteg
 
-    pip3 install --no-cache-dir --upgrade Pillow
-
-    apt-get install -y binwalk ltrace libc6-i386 gcc-multilib g++-multilib john foremost sqlmap
-
-    # zsteg: https://github.com/zed-0xff/zsteg
-    gem install zsteg
-
-    # http://angr.io
-    pip3 install --no-cache-dir --upgrade angr
-
-    # https://blog.didierstevens.com/programs/pdf-tools/
-    curl -sL http://didierstevens.com/files/software/pdf-parser_V0_7_4.zip | funzip > /usr/local/bin/pdf-parser.py
-    chmod a+x /usr/local/bin/pdf-parser.py
-
-else
-    apt-get install -y python3-pil
-fi
-
+# https://blog.didierstevens.com/programs/pdf-tools/
+curl -sL https://didierstevens.com/files/software/pdf-parser_V0_7_14.zip | funzip > /usr/local/bin/pdf-parser.py
+chmod a+x /usr/local/bin/pdf-parser.py
 
 apt-get autoremove -y
 apt-get clean

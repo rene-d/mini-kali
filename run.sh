@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+#
+# Run or attach to a mini-kali container.
+#
 
 set -Eeuo pipefail
 
@@ -32,31 +35,13 @@ find_name()
 }
 
 
-# run the amd64/i386 container
-# run the arm/v7 container
-# run the arm64 container
-# run the crypto/SageMath container
+# run a new container, interactively or in the background
 run()
 {
     local interactive=$1
-    local tag=${2-}
     local name=$(find_name)
     local opt_docker
-    shift 2
-
-    if [[ -z "${tag}" ]]; then
-        case "$(uname -m)" in
-            x86_64) tag=amd64 ;;
-            aarch64|arm64) tag=arm64 ;;
-            *) echo >&2 "Unsupported arch: $(uname -m)"; exit 2 ;;
-        esac
-    fi
-
-    # for now, sagemath image is only available for linux/amd64
-    local ptf=linux/${tag}
-    if [[ "${tag}" == "crypto" ]]; then
-        ptf=linux/amd64
-    fi
+    shift
 
     if [[ $interactive ]]; then
         opt_docker="-ti"
@@ -69,27 +54,26 @@ run()
     exec docker run --rm \
         ${opt_docker} \
             -v $HOME/.vscode-server:/root/.vscode-server \
-            --platform ${ptf} \
+            --platform linux/arm64 \
             --name ${name} \
             --label ${image_name} \
             --hostname ${image_name} \
             -v $PWD:/${image_name} \
             --cap-add=SYS_PTRACE \
-            -e flavor=${tag} \
-            ${image_name}:${tag} $*
+            ${image_name} $*
 }
 
 
 # attach to a running container
 attach()
 {
-    local opt_count
-    local n
+    local opt_count=
+    local n=
 
     while [[ $# -gt 0 ]]; do
         case $1 in
             -h|--help)
-                echo "Usage: $progname [-h | list | <n>]"
+                echo "Usage: $progname [-h | list | <n>]"
                 exit ;;
             list)
                 docker container ls  --filter "label=${image_name}" --format '{{.Names}}\t{{.Status}}\t{{.Image}}\t{{.Command}}'
@@ -119,25 +103,24 @@ attach()
 }
 
 
-# dgse -> attach au 1er conteneur dispo
+# invoked as <image_name>-attach: always attach to a running container
+if [[ ${progname} == *-attach ]]; then
+    attach "$@"
+    exit
+fi
+
+# no argument and a running container: attach to it
 if [[ $# -eq 0 ]] && [[ $(attach count) -gt 0 ]]; then
     attach
     exit
 fi
 
-shopt -s extglob  # rtfm before whining
-tag=${progname##${image_name}?(-)}
-
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        start)
-            shift
-            run "" "${tag-}" $*
-            exit
-            ;;
-        *) break ;;
-    esac
-    shift
-done
-
-run 1 "${tag-}" $*
+case ${1-} in
+    start)
+        shift
+        run "" "$@"
+        ;;
+    *)
+        run 1 "$@"
+        ;;
+esac

@@ -1,5 +1,8 @@
+.git/
 .vscode/
 build.sh
 run.sh
+prepdeb.sh
+prepenv.sh
 README.md
 LICENSE

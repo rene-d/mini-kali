@@ -7,17 +7,7 @@ alias la='ls -A'
 alias ff='find -name'
 alias gg='git grep -n'
 
-if [[ -z "${flavor}" ]]; then
-    suffixe=""
-else
-    suffixe=" \[\033[2m\]${flavor}\[\033[0m\] "
-fi
-
-if [[ "$(uname -m)" = "x86_64" ]]; then
-    PS1="\[\033[01;32m\]\u\[\033[00m\]:\[\033[36m\]\w\[\033[00m\]${suffixe}\$ "
-else
-    PS1="\[\033[01;32m\]\u\[\033[00m\]:\[\033[35m\]\w\[\033[00m\]${suffixe}\$ "
-fi
+PS1="\[\033[01;32m\]\u\[\033[00m\]:\[\033[35m\]\w\[\033[00m\]\$ "
 
 if [[ -n "$instance" ]]; then
     PS1="\[\033[01;33m\]#${instance}\[\033[0m\] "$PS1
